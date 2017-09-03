@@ -22,16 +22,26 @@ namespace AspNetCoreFirst
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole();
+            app.UseExceptionHandler("/error.html");
+            app.UseFileServer();
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            app.Use(async(context, next) => {
+                if (context.Request.Path.Value.Contains("invalid"))
+                    throw new Exception("my test error");
+
+                await next();
+            });
+
             app.Run(async (context) =>
             {
                 await context.Response.WriteAsync("Hello World!");
             });
+            
         }
     }
 }
